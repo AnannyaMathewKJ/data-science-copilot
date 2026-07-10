@@ -11,6 +11,8 @@ import traceback
 import sys
 import math
 
+from attrs import fields
+
 PORT = int(os.environ.get("PORT", 3000))
 DATA_DIR = os.path.join(os.getcwd(), "data")
 
@@ -914,11 +916,16 @@ class MyHandler(http.server.BaseHTTPRequestHandler):
             return
             
         if path == "/analyze":
-            query = fields.get("query", "").strip()
-            dataset_name = fields.get("dataset_name", "").strip()
-            
-            # Load active state to retrieve dataset contents
+    # 1. Load state first to ensure we have a master backup data name
             state = load_state()
+
+    # 2. Safely read form fields with .get() defaults to prevent KeyErrors
+            query = fields.get("query", "") if isinstance(fields.get("query"), str) else ""
+            query = query.strip()
+
+    # Use the form field if provided, otherwise gracefully fall back to the active state name
+            form_dataset = fields.get("dataset_name", "") if isinstance(fields.get("dataset_name"), str) else ""
+            dataset_name = form_dataset.strip() if form_dataset.strip() else state.get("datasetName", "")
             
             # Make sure we got active dataset content
             dataset_path = os.path.join(DATA_DIR, state["datasetName"])
