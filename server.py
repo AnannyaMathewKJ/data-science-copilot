@@ -456,6 +456,10 @@ def call_gemini(prompt: str) -> str:
 # CODE SANDBOX EXECUTION
 # -------------------------------------------------------------
 def run_python_code(code: str, dataset_path: str):
+    import platform
+    # Dynamically select 'python' for Windows and 'python3' for Linux/Render
+    python_cmd = "python" if platform.system() == "Windows" else "python3"
+    
     sandbox_path = os.path.join(os.getcwd(), "sandbox.py")
     local_data_path = os.path.join(os.getcwd(), "data_file")
     
@@ -469,7 +473,8 @@ def run_python_code(code: str, dataset_path: str):
     
     # Run sandbox process
     try:
-        res = subprocess.run(["python", "sandbox.py"], capture_output=True, text=True, timeout=10)
+        # Pass the dynamic command string here instead of a hardcoded value
+        res = subprocess.run([python_cmd, "sandbox.py"], capture_output=True, text=True, timeout=10)
         stdout = res.stdout
         stderr = res.stderr
         exit_code = res.returncode
