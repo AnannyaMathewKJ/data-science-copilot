@@ -1,0 +1,11 @@
+[
+  {"item_id": "I001", "name": "Wireless Mouse", "category": "Electronics", "stock": 120, "price": 25.00, "warehouse": "A"},
+  {"item_id": "I002", "name": "Gaming Keyboard", "category": "Electronics", "stock": 45, "price": 75.00, "warehouse": "B"},
+  {"item_id": "I003", "name": "Ergonomic Chair", "category": "Furniture", "stock": 15, "price": 199.99, "warehouse": "A"},
+  {"item_id": "I004", "name": "Desk Lamp", "category": "Furniture", "stock": 80, "price": 35.50, "warehouse": "C"},
+  {"item_id": "I005", "name": "Water Bottle", "category": "Accessories", "stock": 350, "price": 12.00, "warehouse": "B"},
+  {"item_id": "I006", "name": "USB-C Hub", "category": "Electronics", "stock": 200, "price": 40.00, "warehouse": "A"},
+  {"item_id": "I007", "name": "Notebook (5 pack)", "category": "Office Supplies", "stock": 150, "price": 8.99, "warehouse": "C"},
+  {"item_id": "I008", "name": "Gel Pens (12 pack)", "category": "Office Supplies", "stock": 220, "price": 5.49, "warehouse": "A"},
+  {"item_id": "I009", "name": "Standing Desk", "category": "Furniture", "stock": 8, "price": 349.99, "warehouse": "B"}
+]

@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Autonomous Data Science Co-Pilot</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    .mono { font-family: 'JetBrains Mono', monospace; }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col selection:bg-indigo-500/30">
+
+  <header class="border-b border-slate-800 bg-slate-900/50 backdrop-blur sticky top-0 z-50 px-6 py-4 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <div class="w-9 h-9 rounded-xl bg-indigo-600 flex items-center justify-center font-bold text-lg text-white shadow-lg shadow-indigo-600/30">Ω</div>
+      <div>
+        <h1 class="text-sm font-bold tracking-tight text-white">Autonomous Data Science Co-Pilot</h1>
+        <p class="text-[11px] text-slate-400">RAG-Guided Self-Correction Sandbox Loop</p>
+      </div>
+    </div>
+    <div class="flex items-center gap-2 text-xs">
+      <span class="mono px-2 py-1 rounded bg-slate-800 text-slate-300 text-[10px] uppercase font-bold tracking-wider border border-slate-700/50">
+        Active Dataset: {{ ACTIVE_DATASET_NAME }} ({{ ACTIVE_DATASET_TYPE }})
+      </span>
+    </div>
+  </header>
+
+  <main class="flex-1 max-w-7xl w-full mx-auto p-6 grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+    
+    <div class="lg:col-span-4 space-y-6">
+      <div class="bg-slate-900/20 border border-slate-800 rounded-2xl p-4 space-y-3">
+        <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider px-1">Analytical Pre-sets</h3>
+        <div class="grid grid-cols-1 gap-3 max-h-[340px] overflow-y-auto pr-1">
+          {{ PRESETS_HTML }}
+        </div>
+      </div>
+
+      <div class="bg-slate-900/30 border border-slate-800 rounded-2xl p-5 space-y-4 shadow-xl">
+        <div class="flex items-center justify-between">
+          <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider">Analysis Engine Request</h3>
+          <span class="text-[10px] font-mono text-indigo-400/80">Gemini 2.5 Flash</span>
+        </div>
+        
+        <form action="/analyze" method="POST" class="space-y-4">
+          <input type="hidden" name="dataset_name" value="{{ ACTIVE_DATASET_NAME }}">
+          <div>
+            <label class="block text-[11px] text-slate-400 mb-1.5 font-medium">What would you like to analyze or compute?</label>
+            <textarea name="query" rows="3" class="w-full text-xs bg-slate-950 border border-slate-800 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 rounded-xl p-3 text-slate-200 placeholder-slate-600 font-medium transition-colors outline-none resize-none" placeholder="e.g., Calculate metrics or find specific trends...">{{ ACTIVE_QUERY }}</textarea>
+          </div>
+          <button type="submit" class="w-full py-2.5 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold transition-all shadow-lg shadow-indigo-600/20 flex items-center justify-center gap-2">
+            <span>Run Co-Pilot Agent</span>
+            <span class="text-indigo-200">🚀</span>
+          </button>
+        </form>
+
+        <div class="border-t border-slate-800/80 pt-4">
+          <form action="/upload" method="POST" enctype="multipart/form-data" class="flex items-center justify-between gap-3">
+            <div class="flex-1">
+              <label class="block text-[10px] text-slate-500 mb-1 font-semibold uppercase tracking-wider">Upload Custom File</label>
+              <input type="file" name="dataset_file" accept=".csv,.json" required class="block w-full text-[11px] text-slate-400 file:mr-2 file:py-1 file:px-2.5 file:rounded-md file:border-0 file:text-[10px] file:font-bold file:bg-slate-800 file:text-slate-300 hover:file:bg-slate-700 cursor-pointer">
+            </div>
+            <button type="submit" class="mt-4 px-3 py-1.5 rounded-lg border border-slate-700 bg-slate-800/50 hover:bg-slate-800 text-slate-300 text-[11px] font-semibold transition-colors">Upload</button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <div class="lg:col-span-8 space-y-6">
+      
+      <div class="bg-slate-900/30 border border-slate-800 rounded-2xl p-5 shadow-xl flex flex-col min-h-[280px]">
+        <div class="flex items-center justify-between border-b border-slate-800/80 pb-3 mb-4">
+          <h2 class="text-sm font-bold tracking-tight text-white flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-indigo-500"></span>
+            Visual Insights Deck
+          </h2>
+        </div>
+        {{ VISUAL_TAB_CONTENT }}
+      </div>
+
+      <div class="bg-slate-900/30 border border-slate-800 rounded-2xl p-5 shadow-xl space-y-3">
+        <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Dataset File Data Preview (First 10 Rows)</h3>
+        <div class="overflow-x-auto rounded-xl border border-slate-850 bg-slate-950/40 max-h-56">
+          {{ DATASET_PREVIEW_HTML }}
+        </div>
+      </div>
+
+      <div class="bg-slate-900/30 border border-slate-800 rounded-2xl p-5 shadow-xl space-y-4">
+        <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Agent Self-Correction Loop Logs (Traceback History)</h3>
+        <div class="space-y-4 max-h-[400px] overflow-y-auto pr-1">
+          {{ TRACE_STEPS_HTML }}
+        </div>
+      </div>
+
+      <div class="bg-slate-900/30 border border-slate-800 rounded-2xl p-5 shadow-xl space-y-3">
+        <div class="flex items-center justify-between">
+          <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Final Standalone Python Execution Script</h3>
+          <span class="text-[10px] font-mono text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded">Pure Python Standard Library</span>
+        </div>
+        <div class="bg-slate-950 p-4 rounded-xl border border-slate-850 relative text-xs font-mono leading-relaxed text-indigo-200">
+          <pre class="whitespace-pre overflow-x-auto selection:bg-indigo-500/40">{{ FINAL_CODE }}</pre>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <footer class="border-t border-slate-900 bg-slate-950 text-center py-4 text-[11px] text-slate-600 font-mono">
+    Isolated Code Sandbox Infrastructure • Core Standard Lib Environment
+  </footer>
+
+</body>
+</html>

@@ -1,0 +1,15 @@
+date,product,region,revenue,units_sold
+2025-01-05,Laptop,North,12000,10
+2025-01-08,Phone,South,8000,16
+2025-01-12,Tablet,East,4500,9
+2025-01-15,Laptop,West,15000,12
+2025-01-18,Phone,North,9000,18
+2025-01-22,Tablet,South,3500,7
+2025-01-25,Laptop,East,11000,9
+2025-01-28,Phone,West,10500,21
+2025-02-02,Laptop,South,13500,11
+2025-02-05,Phone,East,7500,15
+2025-02-09,Tablet,West,5000,10
+2025-02-12,Laptop,North,14000,11
+2025-02-16,Phone,South,8500,17
+2025-02-20,Tablet,East,4000,8

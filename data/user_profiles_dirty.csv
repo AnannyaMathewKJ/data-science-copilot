@@ -1,0 +1,12 @@
+user_id,name,email,signup_date,age,country
+101,Alice Smith,alice@example.com,2025-03-01,28,USA
+102,Bob Jones,,2025-03-02,34,Canada
+103,Charlie Brown,charlie@example,2025-03-03,-5,UK
+104,David Miller,david@example.com,2025-03-04,45,USA
+101,Alice Smith,alice@example.com,2025-03-01,28,USA
+105,Eve Davis,eve@example.com,2025-03-05,,Germany
+106,Frank Wilson,frank@com,2025-03-06,120,France
+107,Grace Taylor,grace@example.com,2025-03-07,22,USA
+108,Henry Clark,henry@example.com,2025-03-08,31,Canada
+109,Ivy Thomas,,2025-03-09,-1,Australia
+107,Grace Taylor,grace@example.com,2025-03-07,22,USA

@@ -1,0 +1,12 @@
+[
+  {"customer_id": 1, "name": "Alice", "total_spend": 1250.00, "order_count": 15, "last_active": "2025-06-01"},
+  {"customer_id": 2, "name": "Bob", "total_spend": 150.50, "order_count": 2, "last_active": "2025-05-15"},
+  {"customer_id": 3, "name": "Charlie", "total_spend": 3200.00, "order_count": 42, "last_active": "2025-06-05"},
+  {"customer_id": 4, "name": "David", "total_spend": 450.00, "order_count": 5, "last_active": "2025-05-28"},
+  {"customer_id": 5, "name": "Eve", "total_spend": 89.99, "order_count": 1, "last_active": "2024-04-10"},
+  {"customer_id": 6, "name": "Frank", "total_spend": 1420.00, "order_count": 18, "last_active": "2025-06-03"},
+  {"customer_id": 7, "name": "Grace", "total_spend": 600.00, "order_count": 8, "last_active": "2025-05-20"},
+  {"customer_id": 8, "name": "Henry", "total_spend": 2100.00, "order_count": 25, "last_active": "2025-06-04"},
+  {"customer_id": 9, "name": "Ivy", "total_spend": 45.00, "order_count": 1, "last_active": "2025-03-15"},
+  {"customer_id": 10, "name": "Jack", "total_spend": 1150.00, "order_count": 14, "last_active": "2025-06-02"}
+]
