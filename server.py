@@ -916,17 +916,35 @@ class MyHandler(http.server.BaseHTTPRequestHandler):
             return
             
         if path == "/analyze":
-    # 1. Load state first to ensure we have a master backup data name
+            # 1. Load active state first to ensure default fallback safety
             state = load_state()
-
-    # 2. Safely read form fields with .get() defaults to prevent KeyErrors
-            query = fields.get("query", "") if isinstance(fields.get("query"), str) else ""
-            query = query.strip()
-
-    # Use the form field if provided, otherwise gracefully fall back to the active state name
-            form_dataset = fields.get("dataset_name", "") if isinstance(fields.get("dataset_name"), str) else ""
-            dataset_name = form_dataset.strip() if form_dataset.strip() else state.get("datasetName", "")
             
+            # 2. Extract query parameter safely (checking if it's a dict or string)
+            raw_query = fields.get("query", "")
+            if isinstance(raw_query, dict):
+                query = raw_query.get("content", "").strip()
+            elif isinstance(raw_query, str):
+                query = raw_query.strip()
+            else:
+                query = ""
+                
+            # If query field ended up completely blank, safely grab it from memory state
+            if not query:
+                query = state.get("query", "").strip()
+            
+            # 3. Extract dataset_name parameter safely
+            raw_dataset = fields.get("dataset_name", "")
+            if isinstance(raw_dataset, dict):
+                dataset_name = raw_dataset.get("content", "").strip()
+            elif isinstance(raw_dataset, str):
+                dataset_name = raw_dataset.strip()
+            else:
+                dataset_name = ""
+                
+            # Fall back to state if parameter is missing entirely
+            if not dataset_name:
+                dataset_name = state.get("datasetName", "")
+    
             # Make sure we got active dataset content
             dataset_path = os.path.join(DATA_DIR, state["datasetName"])
             
