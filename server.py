@@ -11,7 +11,7 @@ import traceback
 import sys
 import math
 
-PORT = 3000
+PORT = int(os.environ.get("PORT", 3000))
 DATA_DIR = os.path.join(os.getcwd(), "data")
 
 # Create data directory if it doesn't exist
