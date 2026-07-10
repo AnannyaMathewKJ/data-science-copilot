@@ -11,6 +11,7 @@ import traceback
 import sys
 import math
 
+CUSTOM_GEMINI_KEY = ""
 PORT = 3000
 DATA_DIR = os.path.join(os.getcwd(), "data")
 
@@ -426,10 +427,9 @@ def generate_svg_chart(chart_type, chart_data, chart_config):
 # GEMINI API INTEGRATION
 # -------------------------------------------------------------
 def call_gemini(prompt: str) -> str:
-    # Look for the environment variable first; use the hardcoded string as a backup
-    api_key = os.environ.get("GEMINI_API_KEY")
+    api_key = CUSTOM_GEMINI_KEY or os.environ.get("GEMINI_API_KEY")
     if not api_key:
-        raise ValueError("GEMINI_API_KEY environment variable is missing!")
+        raise ValueError("Missing valid API key. Configure GEMINI_API_KEY in the environment settings.")
     url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={api_key}"
     headers = {
         "Content-Type": "application/json",
