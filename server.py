@@ -145,66 +145,16 @@ def lookup_rag_manual(stderr: str) -> str:
 Since external libraries like 'pandas' or 'numpy' are unavailable in this restricted sandbox, you MUST write pure Python code using standard modules:
 - Reading CSV: Use 'csv.DictReader'
 - Reading JSON: Use 'json.load'
-- Grouping/Aggregating: Use 'collections.defaultdict'
-Example of reading, sanitizing keys, converting column values, and calculating average:
-```python
-import csv
-from collections import defaultdict
-with open('data_file', 'r') as f:
-    reader = csv.DictReader(f)
-    # Strip column header whitespaces
-    headers = [h.strip() for h in reader.fieldnames] if reader.fieldnames else []
-    data = []
-    for row in reader:
-        # Strip data keys and values
-        clean_row = {k.strip(): v.strip() for k, v in row.items() if k is not None}
-        data.append(clean_row)
-
-# Aggregation logic
-grouped = defaultdict(list)
-for row in data:
-    category = row.get('region', 'Unknown')
-    val = float(row.get('revenue', 0.0)) # convert to float safely
-    grouped[category].append(val)
-
-# Format summary as array of dicts for charting:
-chart_data = []
-for cat, values in grouped.items():
-    chart_data.append({"category": cat, "total": sum(values)})
-```"""
+- Grouping/Aggregating: Use 'collections.defaultdict'"""
     elif "KeyError" in stderr:
         return """### KeyError Resolution Manual (RAG Document)
-A KeyError occurs when accessing a column or key that is not present in the dictionary.
-Common causes and fixes:
-1. Space padding: Headers or values may contain leading/trailing whitespaces. Always sanitize keys:
-   `clean_row = {k.strip(): v.strip() for k, v in row.items()}`
-2. Typo: Double-check the spelling of the requested column against the available columns.
-3. Access: Print or check `list(row.keys())` before accessing. Use `dict.get(key, default)` instead of `dict[key]` to prevent crashes."""
-    elif "ValueError" in stderr or "TypeError" in stderr:
-        return """### Safe Type Conversion Manual (RAG Document)
-ValueError/TypeError occurs when converting empty strings or dirty strings to float/int.
-Safe conversion helper function:
-```python
-def safe_float(val, default=0.0):
-    if not val:
-        return default
-    try:
-        return float(str(val).replace('$', '').replace(',', '').strip())
-    except ValueError:
-        return default
-```"""
+A KeyError occurs when accessing a column or key that is not present in the dictionary. Ensure headers are stripped!"""
     else:
         return """### General Python Script Sandbox Execution Manual
-Your script must run standalone and output a single JSON block to stdout.
-Ensure that:
-1. You read from './data_file' using standard 'csv' or 'json' libraries.
-2. You output valid JSON string via `print(json.dumps(...))`.
-3. Do not output anything else to stdout."""
-
+Your script must run standalone and output a valid JSON string structure via stdout."""
 
 def parse_csv_preview(content: str):
-    # .splitlines() handles \r\n (Windows) and \n (Mac/Linux) automatically
-    lines = [l.strip() for l in content.splitlines() if l.strip()]
+    lines: list[str] = [l.strip() for l in content.splitlines() if l.strip()]
     if not lines:
         return {"headers": [], "rows": []}
     
@@ -242,7 +192,7 @@ def parse_json_preview(content: str):
 
 
 # -------------------------------------------------------------
-# BEAUTIFUL SVG CHART GENERATOR (GEOMETRIC BALANCE DESIGN)
+# BEAUTIFUL SVG CHART GENERATOR
 # -------------------------------------------------------------
 def generate_svg_chart(chart_type, chart_data, chart_config):
     if not chart_data or chart_type == "none" or chart_type == "":
@@ -361,8 +311,7 @@ def generate_svg_chart(chart_type, chart_data, chart_config):
         cx = padding_left + chart_w/2
         cy = padding_top + chart_h/2
         r = min(chart_w, chart_h)/2 * 0.95
-        
-        colors = ["#6366f1", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6", "#ec4899", "#14b8a6", "#3b82f6"]
+        colors = ["#6366f1", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6"]
         
         start_angle = 0.0
         for idx, (lbl, val) in enumerate(zip(labels, values)):
@@ -392,16 +341,6 @@ def generate_svg_chart(chart_type, chart_data, chart_config):
                 
             start_angle = end_angle
             
-        svg.append(f'<g transform="translate({cx + r + 20}, {padding_top})">')
-        for idx, (lbl, val) in enumerate(zip(labels, values)):
-            if idx < 6:
-                color = colors[idx % len(colors)]
-                ly_pos = idx * 18
-                lbl_short = lbl[:12] + ".." if len(lbl) > 14 else lbl
-                svg.append(f'<rect x="0" y="{ly_pos}" width="10" height="10" rx="2" fill="{color}" />')
-                svg.append(f'<text x="16" y="{ly_pos + 9}" fill="#94a3b8" font-size="10" font-family="Inter, system-ui">{lbl_short} ({val:,.0f})</text>')
-        svg.append('</g>')
-        
     svg.append('<g font-size="9" fill="#94a3b8" text-anchor="end" font-family="JetBrains Mono, monospace">')
     for i in range(5):
         y_pos = padding_top + i * (chart_h / 4)
@@ -410,17 +349,9 @@ def generate_svg_chart(chart_type, chart_data, chart_config):
     svg.append('</g>')
     
     svg.append('<defs>')
-    svg.append('  <linearGradient id="barGrad" x1="0" y1="0" x2="0" y2="1">')
-    svg.append('    <stop offset="0%" stop-color="#818cf8" />')
-    svg.append('    <stop offset="100%" stop-color="#4f46e5" />')
-    svg.append('  </linearGradient>')
-    svg.append('  <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">')
-    svg.append('    <stop offset="0%" stop-color="#6366f1" stop-opacity="0.4" />')
-    svg.append('    <stop offset="100%" stop-color="#6366f1" stop-opacity="0" />')
-    svg.append('  </linearGradient>')
-    svg.append('</defs>')
-    svg.append('</svg>')
-    
+    svg.append('  <linearGradient id="barGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#818cf8" /><stop offset="100%" stop-color="#4f46e5" /></linearGradient>')
+    svg.append('  <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#6366f1" stop-opacity="0.4" /><stop offset="100%" stop-color="#6366f1" stop-opacity="0" /></linearGradient>')
+    svg.append('</defs></svg>')
     return "".join(svg)
 
 
@@ -476,13 +407,10 @@ def run_python_code(code: str, dataset_path: str):
     with open(sandbox_path, "w", encoding="utf-8") as f:
         f.write(code)
         
-    # Copy dataset file
     import shutil
     shutil.copyfile(dataset_path, local_data_path)
     
-    # Run sandbox process
     try:
-        # Pass the dynamic command string here instead of a hardcoded value
         res = subprocess.run([python_cmd, "sandbox.py"], capture_output=True, text=True, timeout=10)
         stdout = res.stdout
         stderr = res.stderr
@@ -496,20 +424,13 @@ def run_python_code(code: str, dataset_path: str):
         stderr = f"Sandbox startup failure: {str(e)}"
         exit_code = -2
         
-    # Clean up
     for p in [sandbox_path, local_data_path]:
         if os.path.exists(p):
-            try:
-                os.remove(p)
-            except Exception:
-                pass
+            try: os.remove(p)
+            except Exception: pass
                 
     return stdout, stderr, exit_code
 
-
-# -------------------------------------------------------------
-# SAFE JSON PARSER HELPER
-# -------------------------------------------------------------
 def safe_parse_json(text: str):
     try:
         import re
@@ -520,17 +441,12 @@ def safe_parse_json(text: str):
     except Exception:
         return None
 
-
-# -------------------------------------------------------------
-# MULTIPART MULTIFILE FORM PARSER
-# -------------------------------------------------------------
 def parse_multipart(body: bytes, boundary: bytes):
     parts = body.split(b'--' + boundary)
     fields = {}
     for part in parts:
         if not part or part == b'\r\n' or part == b'--\r\n' or part == b'--':
             continue
-            
         try:
             head, val = part.split(b'\r\n\r\n', 1)
         except ValueError:
@@ -548,11 +464,9 @@ def parse_multipart(body: bytes, boundary: bytes):
                         name = p.split('=', 1)[1].strip('"\'')
                     elif p.startswith('filename='):
                         filename = p.split('=', 1)[1].strip('"\'')
-        
         if name:
             if val.endswith(b'\r\n'):
                 val = val[:-2]
-            
             if filename:
                 fields[name] = {
                     "filename": filename,
@@ -561,9 +475,7 @@ def parse_multipart(body: bytes, boundary: bytes):
                 }
             else:
                 fields[name] = val.decode('utf-8', errors='ignore')
-                
     return fields
-
 
 # -------------------------------------------------------------
 # STATE PERSISTENCE
@@ -575,10 +487,8 @@ def load_state():
         try:
             with open(STATE_FILE, "r", encoding="utf-8") as f:
                 return json.load(f)
-        except Exception:
-            pass
+        except Exception: pass
             
-    # Default State matches Presets[0]
     default_prs = PRESETS[0]
     return {
         "datasetName": default_prs["datasetName"],
@@ -600,22 +510,17 @@ def save_state(state):
     except Exception as e:
         print("Error saving state:", str(e))
 
-
 # -------------------------------------------------------------
 # CUSTOM HTTP HANDLER
 # -------------------------------------------------------------
 class MyHandler(http.server.BaseHTTPRequestHandler):
-    
-    def log_message(self, format, *args):
-        # Override to suppress noisy server console logs
-        pass
+    def log_message(self, format, *args): pass
 
     def do_GET(self):
         url_parsed = urllib.parse.urlparse(self.path)
         path = url_parsed.path
         query_params = urllib.parse.parse_qs(url_parsed.query)
         
-        # REST API presets
         if path == "/api/presets":
             self.send_response(200)
             self.send_header("Content-Type", "application/json")
@@ -623,11 +528,8 @@ class MyHandler(http.server.BaseHTTPRequestHandler):
             self.wfile.write(json.dumps(PRESETS).encode('utf-8'))
             return
             
-        # Default application route
         if path == "/":
             state = load_state()
-            
-            # Load Preset parameter if present
             if "preset" in query_params:
                 preset_id = query_params["preset"][0]
                 matched = [p for p in PRESETS if p["id"] == preset_id]
@@ -647,11 +549,9 @@ class MyHandler(http.server.BaseHTTPRequestHandler):
                     }
                     save_state(state)
             
-            # Load index.html template
             with open("index.html", "r", encoding="utf-8") as t_file:
                 template = t_file.read()
                 
-            # Build Presets HTML Cards
             presets_html = []
             for idx, prs in enumerate(PRESETS):
                 is_selected = state["datasetName"] == prs["datasetName"]
@@ -662,59 +562,35 @@ class MyHandler(http.server.BaseHTTPRequestHandler):
                 <a href="/?preset={prs['id']}" class="p-4 rounded-xl text-left border transition-all flex flex-col justify-between group h-full relative {selected_border}">
                   <div>
                     <div class="flex items-center justify-between mb-2">
-                      <span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-slate-500/10 text-slate-500">
-                        Use Case {idx + 1}
-                      </span>
+                      <span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-slate-500/10 text-slate-500">Use Case {idx + 1}</span>
                       {active_badge}
                     </div>
-                    <h4 class="font-bold text-sm tracking-tight mb-1 group-hover:text-indigo-400 transition-colors text-white">
-                      {prs['title']}
-                    </h4>
-                    <p class="text-[11px] line-clamp-2 leading-relaxed text-slate-400">
-                      {prs['description']}
-                    </p>
+                    <h4 class="font-bold text-sm tracking-tight mb-1 group-hover:text-indigo-400 transition-colors text-white">{prs['title']}</h4>
+                    <p class="text-[11px] line-clamp-2 leading-relaxed text-slate-400">{prs['description']}</p>
                   </div>
                   <div class="flex items-center justify-between mt-3 pt-2 border-t border-slate-800/60 text-[10px] text-slate-500 font-mono">
-                    <span class="flex items-center gap-1">
-                      {prs['datasetName']}
-                    </span>
+                    <span>{prs['datasetName']}</span>
                     <span class="text-indigo-400 font-bold group-hover:translate-x-1 transition-all">→</span>
                   </div>
                 </a>
                 """)
-            presets_html_str = "\n".join(presets_html)
             
-            # Build Dataset Preview Table
+            preview = parse_csv_preview(state["datasetContent"]) if state["datasetType"] == "csv" else parse_json_preview(state["datasetContent"])
             preview_html = []
-            if state["datasetType"] == "csv":
-                preview = parse_csv_preview(state["datasetContent"])
-            else:
-                preview = parse_json_preview(state["datasetContent"])
-                
             if preview["headers"]:
-                preview_html.append('<table class="w-full text-[11px] text-left border-collapse">')
-                # Table Headers
-                preview_html.append('<thead>')
-                preview_html.append('<tr class="bg-slate-950/60 border-b border-slate-800">')
+                preview_html.append('<table class="w-full text-[11px] text-left border-collapse"><thead><tr class="bg-slate-950/60 border-b border-slate-800">')
                 for h in preview["headers"]:
                     preview_html.append(f'<th class="p-2 font-mono text-slate-400 font-semibold">{h}</th>')
-                preview_html.append('</tr>')
-                preview_html.append('</thead>')
-                # Table Rows
-                preview_html.append('<tbody class="divide-y divide-slate-800/40">')
+                preview_html.append('</tr></thead><tbody class="divide-y divide-slate-800/40">')
                 for r in preview["rows"]:
                     preview_html.append('<tr>')
                     for h in preview["headers"]:
-                        val_str = str(r.get(h, ""))
-                        preview_html.append(f'<td class="p-2 text-slate-300 font-mono font-medium whitespace-nowrap">{val_str}</td>')
+                        preview_html.append(f'<td class="p-2 text-slate-300 font-mono font-medium whitespace-nowrap">{r.get(h, "")}</td>')
                     preview_html.append('</tr>')
-                preview_html.append('</tbody>')
-                preview_html.append('</table>')
+                preview_html.append('</tbody></table>')
             else:
                 preview_html.append('<div class="p-6 text-center text-slate-500 text-xs">Dataset is empty or invalid</div>')
-            preview_html_str = "".join(preview_html)
             
-            # Build Trace Steps HTML
             trace_html = []
             if state.get("executionSteps"):
                 for step in state["executionSteps"]:
@@ -722,131 +598,39 @@ class MyHandler(http.server.BaseHTTPRequestHandler):
                     status_color = "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" if is_success else "bg-rose-500/10 text-rose-400 border border-rose-500/20"
                     status_text = "Success" if is_success else "Correction needed"
                     
-                    # Escape HTML for display
                     safe_code = step.get("code", "").replace("<", "&lt;").replace(">", "&gt;")
                     safe_stdout = step.get("stdout", "").replace("<", "&lt;").replace(">", "&gt;")
                     safe_stderr = step.get("stderr", "").replace("<", "&lt;").replace(">", "&gt;")
                     
-                    stdout_section = f"""
-                    <div class="bg-slate-950 p-2.5 rounded-lg border border-slate-850 relative text-[10px] font-mono leading-relaxed text-emerald-400/80 max-h-24 overflow-y-auto">
-                      <span class="text-[8px] uppercase font-bold text-slate-500 absolute top-1 right-2">Stdout</span>
-                      <pre class="whitespace-pre overflow-x-auto">{safe_stdout}</pre>
-                    </div>
-                    """ if step.get("stdout") else ""
-                    
-                    stderr_section = f"""
-                    <div class="bg-rose-950/20 p-2.5 border-l-2 border-rose-500/60 text-rose-400 text-[10px] rounded-r-lg space-y-1 font-mono">
-                      <div class="flex items-center gap-1 text-rose-400 font-bold uppercase text-[8px]">
-                        <span>Python Interpreter Traceback (Stderr):</span>
-                      </div>
-                      <pre class="whitespace-pre-wrap leading-relaxed overflow-x-auto">{safe_stderr}</pre>
-                    </div>
-                    """ if step.get("stderr") else ""
-                    
-                    rag_section = ""
-                    if step.get("status") == "error":
-                        rag_doc = lookup_rag_manual(step.get("stderr", ""))
-                        rag_section = f"""
-                        <div class="bg-indigo-950/25 p-2.5 border-l-2 border-indigo-400/50 text-indigo-300 text-[10px] rounded-r-lg space-y-1 font-mono">
-                          <div class="flex items-center gap-1 text-indigo-400 font-bold uppercase text-[8px]">
-                            <span>RAG Corpus Document Retrieved:</span>
-                          </div>
-                          <pre class="whitespace-pre-wrap leading-relaxed overflow-x-auto">{rag_doc}</pre>
-                        </div>
-                        """
+                    stdout_sec = f'<div class="bg-slate-950 p-2.5 rounded-lg text-[10px] text-emerald-400/80"><pre>{safe_stdout}</pre></div>' if step.get("stdout") else ""
+                    stderr_sec = f'<div class="bg-rose-950/20 p-2.5 border-l-2 border-rose-500/60 text-rose-400 text-[10px]"><pre>{safe_stderr}</pre></div>' if step.get("stderr") else ""
                     
                     trace_html.append(f"""
-                    <div class="p-3.5 rounded-xl border border-slate-800 bg-slate-900/10 space-y-3">
+                    <div class="p-3.5 rounded-xl border border-slate-800 space-y-3">
                       <div class="flex items-center justify-between text-[11px]">
-                        <span class="text-slate-400 flex items-center gap-1">
-                          <span class="text-indigo-400 font-bold">[{step.get('stepNumber')}]</span>
-                          <span class="font-semibold text-slate-200">{step.get('title')}</span>
-                        </span>
-                        <span class="text-[9px] font-bold px-1.5 py-0.2 rounded uppercase {status_color}">
-                          {status_text}
-                        </span>
+                        <span class="text-slate-200 font-semibold">[{step.get('stepNumber')}] {step.get('title')}</span>
+                        <span class="text-[9px] font-bold px-1.5 py-0.2 rounded uppercase {status_color}">{status_text}</span>
                       </div>
-                      
-                      <div class="bg-slate-950 p-2.5 rounded-lg border border-slate-850 relative text-[10px] font-mono leading-relaxed text-indigo-300 max-h-28 overflow-y-auto">
-                        <span class="text-[8px] uppercase font-bold text-slate-500 absolute top-1 right-2">Code Generated</span>
-                        <pre class="whitespace-pre overflow-x-auto">{safe_code}</pre>
-                      </div>
-                      
-                      {stdout_section}
-                      {stderr_section}
-                      {rag_section}
+                      <div class="bg-slate-950 p-2.5 rounded-lg text-[10px] text-indigo-300"><pre>{safe_code}</pre></div>
+                      {stdout_sec}
+                      {stderr_sec}
                     </div>
                     """)
             else:
-                trace_html.append("""
-                <div class="p-8 rounded-xl border border-slate-800 border-dashed text-center space-y-3">
-                  <div class="mx-auto w-10 h-10 rounded-xl bg-slate-800 text-slate-500 flex items-center justify-center">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                      <path d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                    </svg>
-                  </div>
-                  <div>
-                    <h4 class="text-xs font-semibold text-slate-300">No agent traces active</h4>
-                    <p class="text-[10px] text-slate-500">Provide an analytical prompt and click Analyze to start</p>
-                  </div>
-                </div>
-                """)
-            trace_html_str = "\n".join(trace_html)
+                trace_html.append('<div class="p-8 text-center text-slate-500 text-xs">No agent traces active</div>')
             
-            # Build Visual Tab Content
             chart_svg = generate_svg_chart(state.get("chartType", "none"), state.get("chartData", []), state.get("chartConfig", {}))
+            visual_tab_html = f'<div class="grid grid-cols-1 md:grid-cols-12 gap-5 items-center"><div class="md:col-span-7 bg-slate-950 p-4 rounded-xl">{chart_svg}</div><div class="md:col-span-5"><p class="text-xs text-slate-300">{state.get("insightSummary", "")}</p></div></div>' if chart_svg else f'<div class="p-10 text-center text-slate-500 text-xs">{state.get("insightSummary", "")}</div>'
             
-            visual_tab_html = []
-            if chart_svg:
-                visual_tab_html.append(f"""
-                <div class="grid grid-cols-1 md:grid-cols-12 gap-5 items-center flex-1">
-                  <!-- Chart rendering column -->
-                  <div class="md:col-span-7 flex items-center justify-center bg-slate-950 p-4 border border-slate-850 rounded-xl h-[230px]">
-                    {chart_svg}
-                  </div>
-                  <!-- Insights narrative column -->
-                  <div class="md:col-span-5 space-y-2">
-                    <span class="text-[10px] uppercase font-bold text-slate-500 font-mono tracking-wider">Analysis Narrative Insight</span>
-                    <p class="text-xs text-slate-300 leading-relaxed font-medium">
-                      {state.get('insightSummary', '')}
-                    </p>
-                  </div>
-                </div>
-                """)
-            else:
-                # Fallback message
-                visual_tab_html.append(f"""
-                <div class="flex-1 flex flex-col items-center justify-center text-center p-10 border border-dashed border-slate-850 rounded-xl bg-slate-950/20 space-y-3">
-                  <div class="w-12 h-12 rounded-2xl bg-indigo-500/10 text-indigo-400 flex items-center justify-center">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                      <path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 002 2h2a2 2 0 002-2"></path>
-                    </svg>
-                  </div>
-                  <div>
-                    <h4 class="text-xs font-semibold text-slate-300">Analytical Insights Deck ready</h4>
-                    <p class="text-[11px] text-slate-500 max-w-sm">
-                      {state.get('insightSummary', 'Run the Co-pilot. Charts and observations will be dynamically drawn here.')}
-                    </p>
-                  </div>
-                </div>
-                """)
-            visual_tab_str = "".join(visual_tab_html)
-            
-            # Safe clean final code
-            final_code_str = state.get("finalCode", "").strip()
-            if not final_code_str:
-                final_code_str = "# Final standalone python script will populate here"
-                
-            # Perform substitutions
             html_rendered = template \
-                .replace("{{ PRESETS_HTML }}", presets_html_str) \
+                .replace("{{ PRESETS_HTML }}", "\n".join(presets_html)) \
                 .replace("{{ ACTIVE_DATASET_NAME }}", state["datasetName"]) \
                 .replace("{{ ACTIVE_DATASET_TYPE }}", state["datasetType"].upper()) \
-                .replace("{{ DATASET_PREVIEW_HTML }}", preview_html_str) \
+                .replace("{{ DATASET_PREVIEW_HTML }}", "".join(preview_html)) \
                 .replace("{{ ACTIVE_QUERY }}", state["query"]) \
-                .replace("{{ TRACE_STEPS_HTML }}", trace_html_str) \
-                .replace("{{ VISUAL_TAB_CONTENT }}", visual_tab_str) \
-                .replace("{{ FINAL_CODE }}", final_code_str)
+                .replace("{{ TRACE_STEPS_HTML }}", "\n".join(trace_html)) \
+                .replace("{{ VISUAL_TAB_CONTENT }}", visual_tab_html) \
+                .replace("{{ FINAL_CODE }}", state.get("finalCode", "").strip() or "# Ready")
                 
             self.send_response(200)
             self.send_header("Content-Type", "text/html; charset=utf-8")
@@ -854,7 +638,6 @@ class MyHandler(http.server.BaseHTTPRequestHandler):
             self.wfile.write(html_rendered.encode('utf-8'))
             return
             
-        # Fallback for 404
         self.send_response(404)
         self.end_headers()
 
@@ -862,99 +645,61 @@ class MyHandler(http.server.BaseHTTPRequestHandler):
         url_parsed = urllib.parse.urlparse(self.path)
         path = url_parsed.path
         
-        # Read Content details
         content_length = int(self.headers.get('Content-Length', 0))
         content_type = self.headers.get('Content-Type', '')
-        
         body_bytes = self.rfile.read(content_length) if content_length > 0 else b''
         
-        # Parse fields
         fields = {}
         if 'multipart/form-data' in content_type:
             boundary_str = content_type.split('boundary=')[1].strip()
             fields = parse_multipart(body_bytes, boundary_str.encode('utf-8'))
         elif 'application/x-www-form-urlencoded' in content_type:
-            # Parse form urlencoded
-            decoded = body_bytes.decode('utf-8', errors='ignore')
-            qs = urllib.parse.parse_qs(decoded)
+            qs = urllib.parse.parse_qs(body_bytes.decode('utf-8', errors='ignore'))
             fields = {k: v[0] for k, v in qs.items()}
             
         if path == "/upload":
-            # Handle uploaded files
             if "dataset_file" in fields and isinstance(fields["dataset_file"], dict):
                 file_info = fields["dataset_file"]
                 name = file_info["filename"]
                 content = file_info["content"]
-                
-                # Determine type
                 file_type = "json" if name.lower().endswith(".json") else "csv"
                 
-                # Save uploaded file
-                dataset_path = os.path.join(DATA_DIR, name)
-                with open(dataset_path, "w", encoding="utf-8") as f:
+                with open(os.path.join(DATA_DIR, name), "w", encoding="utf-8") as f:
                     f.write(content)
                     
-                # Setup active state
                 state = {
                     "datasetName": name,
                     "datasetType": file_type,
                     "datasetContent": content,
-                    "query": "Perform a comprehensive data quality audit and output a summary of missing values, anomalies, and row counts." if file_type == "csv" else "Show me the total spend grouped by categories.",
-                    "executionSteps": [],
-                    "chartType": "none",
-                    "chartData": [],
-                    "chartConfig": {},
-                    "insightSummary": "Custom dataset uploaded successfully! Ask any questions above.",
-                    "finalCode": ""
+                    "query": "Perform analysis." if file_type == "csv" else "Show spend data.",
+                    "executionSteps": [], "chartType": "none", "chartData": [], "chartConfig": {},
+                    "insightSummary": "Custom dataset uploaded successfully!", "finalCode": ""
                 }
                 save_state(state)
-                
-            # Redirect to GET /
             self.send_response(303)
             self.send_header("Location", "/")
             self.end_headers()
             return
             
         if path == "/analyze":
-            # 1. Load active state first to ensure default fallback safety
             state = load_state()
             
-            # 2. Extract query parameter safely (checking if it's a dict or string)
-            raw_query = fields.get("query", "")
-            if isinstance(raw_query, dict):
-                query = raw_query.get("content", "").strip()
-            elif isinstance(raw_query, str):
-                query = raw_query.strip()
-            else:
-                query = ""
-                
-            # If query field ended up completely blank, safely grab it from memory state
-            if not query:
-                query = state.get("query", "").strip()
+            # --- FIXED ROBUST PARAMETER EXTRACTION ---
+            def extract_string(field_key):
+                val = fields.get(field_key, "")
+                if isinstance(val, dict):
+                    return val.get("content", "").strip()
+                if isinstance(val, str):
+                    return val.strip()
+                return ""
+
+            query = extract_string("query") or state.get("query", "").strip()
+            dataset_name = extract_string("dataset_name") or state.get("datasetName", "")
+            # -----------------------------------------
             
-            # 3. Extract dataset_name parameter safely
-            raw_dataset = fields.get("dataset_name", "")
-            if isinstance(raw_dataset, dict):
-                dataset_name = raw_dataset.get("content", "").strip()
-            elif isinstance(raw_dataset, str):
-                dataset_name = raw_dataset.strip()
-            else:
-                dataset_name = ""
-                
-            # Fall back to state if parameter is missing entirely
-            if not dataset_name:
-                dataset_name = state.get("datasetName", "")
-    
-            # Make sure we got active dataset content
             dataset_path = os.path.join(DATA_DIR, state["datasetName"])
+            preview = parse_csv_preview(state["datasetContent"]) if state["datasetType"] == "csv" else parse_json_preview(state["datasetContent"])
             
-            # Parse preview
-            preview = {"headers": []}
-            if state["datasetType"] == "csv":
-                preview = parse_csv_preview(state["datasetContent"])
-            else:
-                preview = parse_json_preview(state["datasetContent"])
-                
             execution_steps = []
             current_attempt = 1
             max_attempts = 3
@@ -962,96 +707,46 @@ class MyHandler(http.server.BaseHTTPRequestHandler):
             parsed_result = None
             final_code = ""
             
-            # Construct base Gemini Prompt
             initial_prompt = f"""You are the Autonomous Data Science Co-Pilot.
 The user uploaded a dataset named "{state['datasetName']}".
-It has the following headers: {", ".join(preview["headers"])}.
-Here is a small preview of the data:
-{json.dumps(preview["rows"][:3], indent=2)}
+It has headers: {", ".join(preview["headers"])}.
+Preview: {json.dumps(preview["rows"][:3], indent=2)}
+User asks: "{query}"
 
-The user asks: "{query}"
-
-Since this is a restricted Python sandbox environment, you MUST write executable Python code using only standard modules (such as 'csv', 'json', 'collections', 'datetime', 'math', 'statistics'). Do NOT import pandas or numpy, as they are not available in this Python installation.
-
-Your code must:
-1. Open the local file './data_file' and parse it.
-2. Safely clean whitespaces from header keys and cell values (e.g., using k.strip() and v.strip()).
-3. Perform calculations, groupings, analysis or quality audit as asked.
-4. Output a single JSON string directly to stdout. Do not output anything else.
-   The output JSON format MUST be exactly:
-   {{
-     "chartType": "bar" | "line" | "pie" | "scatter" | "area" | "none",
-     "chartData": [
-        {{"label": "Group A", "value": 100}},
-        ...
-     ],
-     "chartConfig": {{
-        "xKey": "label",
-        "yKeys": ["value"],
-        "xLabel": "Label Header",
-        "yLabel": "Value Header"
-     }},
-     "insight": "Write a descriptive professional data analysis insight paragraph here."
-   }}
-
-Write ONLY the executable Python code block inside a markdown python block:
+Write standalone Python code using standard modules only. No pandas, no numpy.
+Read from './data_file'. Standardize key formatting. Output valid JSON block to stdout matching layout:
+{{
+  "chartType": "bar" | "line" | "pie" | "none",
+  "chartData": [{{"label": "X", "value": 100}}],
+  "chartConfig": {{"xKey": "label", "yKeys": ["value"]}},
+  "insight": "Written text summary insight here."
+}}
+Wrap code strictly inside a markdown python block:
 ```python
-# code here
+# code
 ```"""
             
             try:
                 while current_attempt <= max_attempts and not success:
                     prompt = initial_prompt
                     if current_attempt > 1:
-                        # Self-correction prompt
                         last_step = execution_steps[-1]
                         rag_manual = lookup_rag_manual(last_step.get("stderr", ""))
-                        
-                        prompt = f"""You are the Autonomous Data Science Co-Pilot.
-We ran your previous python script in the sandbox and it failed!
-Error output (stderr):
-{last_step.get("stderr")}
-
-Failed python code was:
-```python
-{last_step.get("code")}
-```
-
-Here is the relevant Official RAG Reference Manual on resolving this error:
-{rag_manual}
-
-Please fix the error. Write a corrected standalone Python script that reads './data_file', performs the calculations requested, and outputs the specified JSON to stdout. Do not use external libraries. Ensure you strip headers/values and cast values safely!
-
-Write ONLY the executable Python code block inside:
-```python
-# code here
-```"""
-                    
-                    step_log = {
-                        "stepNumber": current_attempt,
-                        "title": "Generating initial analytical code" if current_attempt == 1 else f"Self-Correction Attempt {current_attempt - 1} (RAG Guided)",
-                        "status": "running",
-                        "code": "",
-                        "stdout": "",
-                        "stderr": ""
-                    }
+                        prompt = f"""Fix this execution failure error:\n{last_step.get("stderr")}\nCode used:\n
+http://googleusercontent.com/immersive_entry_chip/0\nrag_manual\nProvide standalone fixed script."""
+                        step_log = {"stepNumber": current_attempt, "title": "Analyzing Data Layer", "status": "running", "code": "", "stdout": "", "stderr": ""}
                     execution_steps.append(step_log)
                     
-                    # Call Gemini
                     gemini_text = call_gemini(prompt)
-                    
-                    # Extract python block
                     import re
                     code_match = re.search(r'```python([\s\S]*?)```', gemini_text)
                     code_to_run = code_match.group(1).strip() if code_match else gemini_text.strip()
-                    
                     if code_to_run.startswith("python"):
                         code_to_run = code_to_run[6:].strip()
                         
                     step_log["code"] = code_to_run
                     final_code = code_to_run
                     
-                    # Run code sandbox
                     stdout, stderr, exit_code = run_python_code(code_to_run, dataset_path)
                     step_log["stdout"] = stdout
                     step_log["stderr"] = stderr
@@ -1064,53 +759,35 @@ Write ONLY the executable Python code block inside:
                             step_log["status"] = "success"
                         else:
                             step_log["status"] = "error"
-                            step_log["stderr"] = "Invalid output format. Script stdout was not parseable as the required JSON schema. Stdout was: " + stdout
+                            step_log["stderr"] = "Output was not valid schema JSON."
                     else:
                         step_log["status"] = "error"
-                        if not step_log["stderr"]:
-                            step_log["stderr"] = f"Script exited with code {exit_code}."
-                            
                     current_attempt += 1
                     
-                # Save analysis output to state
                 state["query"] = query
                 state["executionSteps"] = execution_steps
                 state["chartType"] = parsed_result.get("chartType", "none") if parsed_result else "none"
                 state["chartData"] = parsed_result.get("chartData", []) if parsed_result else []
                 state["chartConfig"] = parsed_result.get("chartConfig", {}) if parsed_result else {}
-                state["insightSummary"] = parsed_result.get("insight", "Analysis complete but returned no detailed written narrative.") if parsed_result else "Co-pilot analysis loop completed, but all sandbox executions returned errors. Review the Traceback logs to identify sandbox execution issues."
+                state["insightSummary"] = parsed_result.get("insight", "Calculation built but no narrative passed back.") if parsed_result else "Errors logged across executions."
                 state["finalCode"] = final_code
                 save_state(state)
-                
             except Exception as e:
-                print("Exception during analyze:", str(e))
-                traceback.print_exc()
-                state["query"] = query
-                state["insightSummary"] = f"An analytical engine runtime exception occurred: {str(e)}"
+                state["insightSummary"] = f"Runtime exception occurred: {str(e)}"
                 save_state(state)
                 
-            # Redirect back to GET /
             self.send_response(303)
             self.send_header("Location", "/")
             self.end_headers()
             return
             
-        # Fallback for POST 404
         self.send_response(404)
         self.end_headers()
 
-
-# -------------------------------------------------------------
-# START SERVER
-# -------------------------------------------------------------
 if __name__ == "__main__":
     print(f"Starting Python HTTP Server on port {PORT}...")
-    handler = MyHandler
-    # Allow port reuse to avoid 'Address already in use' errors
     socketserver.TCPServer.allow_reuse_address = True
-    with socketserver.TCPServer(( '0.0.0.0', PORT ), handler) as httpd:
+    with socketserver.TCPServer(('0.0.0.0', PORT), MyHandler) as httpd:
         print("Server running successfully!")
-        try:
-            httpd.serve_forever()
-        except KeyboardInterrupt:
-            pass
+        try: httpd.serve_forever()
+        except KeyboardInterrupt: pass
