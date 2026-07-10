@@ -426,8 +426,10 @@ def generate_svg_chart(chart_type, chart_data, chart_config):
 # GEMINI API INTEGRATION
 # -------------------------------------------------------------
 def call_gemini(prompt: str) -> str:
-    api_key = os.environ.get("GEMINI_API_KEY")
-    if not api_key:
+    # Look for the environment variable first; use the hardcoded string as a backup
+    api_key = os.environ.get("GEMINI_API_KEY") or "AQ.Ab8RN6J6HFlx3rlbQwWFlGjuDFadL9gTGeC5omvOE_VJvvBXBw"
+
+    if not api_key or api_key == "AQ.Ab8RN6J6HFlx3rlbQwWFlGjuDFadL9gTGeC5omvOE_VJvvBXBw":
         raise ValueError("GEMINI_API_KEY environment variable is missing!")
     
     url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={api_key}"
