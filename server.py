@@ -10,6 +10,10 @@ import collections
 import traceback
 import sys
 import math
+from dotenv import load_dotenv
+load_dotenv()  # Load environment variables from .env file
+api_key = os.getenv("GEMINI_API_KEY")  # Retrieve the GEMINI_API_KEY from environment variables
+
 
 PORT = 3000
 DATA_DIR = os.path.join(os.getcwd(), "data")
@@ -427,11 +431,9 @@ def generate_svg_chart(chart_type, chart_data, chart_config):
 # -------------------------------------------------------------
 def call_gemini(prompt: str) -> str:
     # Look for the environment variable first; use the hardcoded string as a backup
-    api_key = os.environ.get("GEMINI_API_KEY") or "AQ.Ab8RN6J6HFlx3rlbQwWFlGjuDFadL9gTGeC5omvOE_VJvvBXBw"
-
-    if not api_key or api_key == "AQ.Ab8RN6J6HFlx3rlbQwWFlGjuDFadL9gTGeC5omvOE_VJvvBXBw":
+    api_key = os.environ.get("GEMINI_API_KEY")
+    if not api_key:
         raise ValueError("GEMINI_API_KEY environment variable is missing!")
-    
     url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={api_key}"
     headers = {
         "Content-Type": "application/json",
