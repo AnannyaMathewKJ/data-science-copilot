@@ -474,7 +474,7 @@ def run_python_code(code: str, dataset_path: str):
     # Run sandbox process
     try:
         # Pass the dynamic command string here instead of a hardcoded value
-        res = subprocess.run(["python", "sandbox.py"], capture_output=True, text=True, timeout=10)
+        res = subprocess.run([python_cmd, "sandbox.py"], capture_output=True, text=True, timeout=10)
         stdout = res.stdout
         stderr = res.stderr
         exit_code = res.returncode
