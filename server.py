@@ -426,14 +426,20 @@ def generate_svg_chart(chart_type, chart_data, chart_config):
 # GEMINI API INTEGRATION
 # -------------------------------------------------------------
 def call_gemini(prompt: str) -> str:
-    api_key = os.environ.get("GEMINI_API_KEY")
-    if not api_key:
+    # 1. Grab key from environment or fallback safely
+    api_key = os.environ.get("GEMINI_API_KEY") or "AQ.Ab8RN6J6HFlx3rlbQwWFlGjuDFadL9gTGeC5omvOE_VJvvBXBw"
+    
+    if not api_key or api_key == "AQ.Ab8RN6J6HFlx3rlbQwWFlGjuDFadL9gTGeC5omvOE_VJvvBXBw":
         raise ValueError("GEMINI_API_KEY environment variable is missing!")
     
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={api_key}"
+    # 2. Production URL: Remove the raw key string from the URL path parameter
+    url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent"
+    
+    # 3. Add Google's official authentication headers
     headers = {
         "Content-Type": "application/json",
-        "User-Agent": "aistudio-build"
+        "User-Agent": "aistudio-build",
+        "x-goog-api-key": api_key  # Passing it securely via headers bypasses Render network blocks
     }
     
     body = {
@@ -445,6 +451,7 @@ def call_gemini(prompt: str) -> str:
         }
     }
     
+    # 4. Transmit request
     req = urllib.request.Request(url, data=json.dumps(body).encode('utf-8'), headers=headers, method="POST")
     with urllib.request.urlopen(req) as res:
         response_data = json.loads(res.read().decode('utf-8'))
