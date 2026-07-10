@@ -10,10 +10,6 @@ import collections
 import traceback
 import sys
 import math
-from dotenv import load_dotenv
-load_dotenv()  # Load environment variables from .env file
-api_key = os.getenv("GEMINI_API_KEY")  # Retrieve the GEMINI_API_KEY from environment variables
-
 
 PORT = 3000
 DATA_DIR = os.path.join(os.getcwd(), "data")
